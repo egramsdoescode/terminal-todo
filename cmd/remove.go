@@ -1,28 +1,83 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
+	"bufio"
+	"log"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
-	Use:   "remove",
+	Use:   "remove [task]",
 	Short: "Remove a task",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("remove called")
-	},
+	    if len(args) == 1{
+            task := args[0]
+
+            err := removeTask(task)
+            if err != nil {
+                log.Fatal(err)
+            }
+        } else {
+            log.Println("Invalid number of arguments")
+        }
+    },
+}
+
+func removeTask(task string) error {
+    linesToKeep, err := makeNewList(task)
+    if err != nil {
+        return err
+    }
+
+    file, err := os.OpenFile("todo.csv", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+    
+    for _, line := range linesToKeep {
+        _, err := file.WriteString(line + "\n")
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+
+func makeNewList(task string) ([]string, error) {
+	file, err := os.Open("todo.csv") 
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+    
+    var linesToKeep []string
+
+    scanner := bufio.NewScanner(file)
+
+    for scanner.Scan() {
+        data := strings.Split(scanner.Text(), ",")
+        if data[0] != task {
+            linesToKeep = append(linesToKeep, scanner.Text())
+        }
+    }
+
+    err = scanner.Err()
+    if err != nil {
+        return nil, err
+    }
+
+    return linesToKeep, nil 
 }
 
 func init() {
