@@ -29,7 +29,7 @@ func readTodoList() error {
     if err != nil {
         return err
     }
-
+    
     if string(list) != "" { 
         fmt.Println(string(list))
     } else {
