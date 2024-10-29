@@ -1,6 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2024 Ethan Grams ethandoescode@gmail.com 
 */
 package main
 
