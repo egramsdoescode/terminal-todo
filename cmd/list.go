@@ -30,7 +30,7 @@ func readTodoList() error {
         return err
     }
     
-    if string(list) != "" { 
+    if len(list) != 0 { 
         fmt.Println(string(list))
     } else {
         fmt.Println("No tasks")
