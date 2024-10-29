@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+    "encoding/csv"
+    "text/tabwriter"
 
 	"github.com/spf13/cobra"
 )
@@ -17,24 +19,35 @@ var listCmd = &cobra.Command{
 	Short: "View todo list",
     Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
-        err := readTodoList()
+        err := displayTodoList("todo.csv")
         if err != nil {
             log.Fatal("No task list. Create some tasks with the add command!")
         }
     },
 }
 
-func readTodoList() error {
-    list, err := os.ReadFile("todo.csv")
+func displayTodoList(filename string) error {
+    file, err := os.Open(filename)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+    
+    reader := csv.NewReader(file)
+    records, err := reader.ReadAll()
     if err != nil {
         return err
     }
     
-    if len(list) != 0 { 
-        fmt.Println(string(list))
-    } else {
-        fmt.Println("No tasks")
+    w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.AlignRight)
+    fmt.Fprintln(w, "   Task\t      Time\t")
+    fmt.Fprintln(w, "---------------------")
+
+    for _, record := range records {
+        fmt.Fprintf(w, "%s\t%s\t\n", record[0], record[1])
     }
+    w.Flush()
+    
     return nil
 }
 
